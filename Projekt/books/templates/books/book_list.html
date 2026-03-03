@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Biblioteka</title>
+</head>
+<body>
+    <h1>Książki</h1>
+    <p><a href="{% url 'books:create' %}">Dodaj książkę</a></p>
+    {% if books %}
+    <table>
+        <thead>
+            <tr>
+                <th>Tytuł</th>
+                <th>Autor</th>
+                <th>Rok wydania</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for book in books %}
+            <tr>
+                <td>{{ book.tytul }}</td>
+                <td>{{ book.autor }}</td>
+                <td>{{ book.rok_wydania }}</td>
+                <td>
+                    <a href="{% url 'books:edit' book.pk %}">Edytuj</a>
+                    <a href="{% url 'books:delete' book.pk %}">Usuń</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Brak książek.</p>
+    {% endif %}
+</body>
+</html>
