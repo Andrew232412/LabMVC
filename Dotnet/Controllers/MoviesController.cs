@@ -14,9 +14,17 @@ public class MoviesController : Controller
         _context = context;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string searchString, string movieGenre)
     {
-        return View(await _context.Movie.ToListAsync());
+        ViewData["CurrentFilter"] = searchString;
+        var genres = await _context.Movie.Where(m => m.Genre != null).Select(m => m.Genre).Distinct().OrderBy(g => g).ToListAsync();
+        ViewBag.MovieGenre = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(genres);
+        var movies = _context.Movie.AsQueryable();
+        if (!string.IsNullOrEmpty(searchString))
+            movies = movies.Where(m => m.Title != null && m.Title.Contains(searchString));
+        if (!string.IsNullOrEmpty(movieGenre))
+            movies = movies.Where(m => m.Genre == movieGenre);
+        return View(await movies.ToListAsync());
     }
 
     public async Task<IActionResult> Details(int? id)
@@ -34,7 +42,7 @@ public class MoviesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Title,ReleaseDate,Genre,Price")] Movie movie)
+    public async Task<IActionResult> Create([Bind("Id,Title,ReleaseDate,Genre,Price,Rating")] Movie movie)
     {
         if (ModelState.IsValid)
         {
@@ -55,7 +63,7 @@ public class MoviesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseDate,Genre,Price")] Movie movie)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseDate,Genre,Price,Rating")] Movie movie)
     {
         if (id != movie.Id) return NotFound();
         if (ModelState.IsValid)
